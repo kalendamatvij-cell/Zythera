@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>FUNWORLD — лампова кімната + адмін панель (пароль 123)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #1a1e2b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 8px;
+        }
+        .phone {
+            max-width: 420px;
+            width: 100%;
+            background: #0f1219;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
+            color: #e0e4f0;
+            position: relative;
+        }
+        /* Екран авторизації (темна кімната) */
+        #auth-screen {
+            min-height: 100vh;
+            background: #0a0c14;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.5s, box-shadow 0.5s;
+            position: relative;
+            padding: 20px;
+        }
+        #auth-screen.light {
+            background: #2a3347;
+            box-shadow: inset 0 0 100px rgba(255, 255, 200, 0.3);
+        }
+
+        /* ДУЖЕ ГАРНА ЛАМПА */
+        .lamp {
+            position: relative;
+            width: 200px;
+            height: 280px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.7));
+            transform: scale(0.9);
+        }
+        @media (max-width: 360px) {
+            .lamp {
+                transform: scale(0.8);
+            }
+        }
+        .lamp-chain {
+            position: absolute;
+            top: -15px;
+            left: 90px;
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(to right, #b5a577, #7a6a4f);
+            border-radius: 2px;
+            box-shadow: 0 0 5px #aa9955;
+            z-index: 5;
+        }
+        .lamp-chain::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: -6px;
+            width: 16px;
+            height: 12px;
+            background: #c9b37e;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px #00000066;
+        }
+        .lamp-shade {
+            position: absolute;
+            top: 10px;
+            left: 40px;
+            width: 120px;
+            height: 100px;
+            background: linear-gradient(145deg, #e4cd9a, #c8a86b);
+            border-radius: 60% 60% 30% 30% / 80% 80% 20% 20%;
+            transform: perspective(200px) rotateX(2deg);
+            box-shadow: 0 10px 0 #8b6f42, inset -5px -10px 10px #a5834b, inset 5px 5px 20px #ffecb3;
+            overflow: hidden;
+            z-index: 10;
+        }
+        .shade-pattern {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 80px;
+            height: 60px;
+            background: repeating-linear-gradient(45deg, #ffdd99 0px, #ffdd99 5px, #e5b87b 5px, #e5b87b 10px);
+            border-radius: 50%;
+            opacity: 0.3;
+            mix-blend-mode: overlay;
+        }
+        .shade-glow {
+            position: absolute;
+            bottom: 0;
+            left: 30px;
+            width: 60px;
+            height: 30px;
+            background: radial-gradient(ellipse at center, #ffeeaa 0%, transparent 80%);
+            filter: blur(8px);
+            opacity: 0.5;
+        }
+        .lamp-pole {
+            position: absolute;
+            top: 90px;
+            left: 90px;
+            width: 20px;
+            height: 100px;
+            background: linear-gradient(to right, #b39b6b, #7d6139, #b39b6b);
+            border-radius: 10px 10px 5px 5px;
+            box-shadow: inset -2px -2px 5px #4f3f2b, inset 2px 2px 5px #efd7a7;
+            z-index: 5;
+        }
+        .lamp-pole::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 0;
+            width: 20px;
+            height: 15px;
+            background: #b39b6b;
+            border-radius: 50%;
+            box-shadow: 0 5px 0 #6b4f2e;
+        }
+        .lamp-pole::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: -10px;
+            width: 40px;
+            height: 15px;
+            background: #6b4f2e;
+            border-radius: 20px;
+            box-shadow: 0 5px 5px #00000055;
+        }
+        .lamp-base {
+            position: absolute;
+            bottom: 0;
+            left: 60px;
+            width: 80px;
+            height: 40px;
+            background: #4a3c2a;
+            border-radius: 40% 40% 20% 20% / 60% 60% 40% 40%;
+            box-shadow: 0 10px 0 #2a1f14, inset -2px -2px 5px #1f160e, inset 2px 2px 5px #b39b6b;
+            z-index: 20;
+        }
+        .base-detail {
+            position: absolute;
+            top: 5px;
+            left: 20px;
+            width: 40px;
+            height: 10px;
+            background: #c9b37e;
+            border-radius: 10px;
+            box-shadow: 0 2px 2px #00000033;
+        }
+        .lamp-light {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 240px;
+            height: 240px;
+            background: radial-gradient(circle, #fff6d5 0%, #ffe4b5 20%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            filter: blur(20px);
+            z-index: 0;
+        }
+        .lamp.lit .lamp-light {
+            opacity: 0.9;
+        }
+        .lamp-reflection {
+            position: absolute;
+            top: 40px;
+            left: 70px;
+            width: 60px;
+            height: 40px;
+            background: radial-gradient(circle, #ffffff80 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s;
+            filter: blur(5px);
+        }
+        .lamp.lit .lamp-reflection {
+            opacity: 0.7;
+        }
+
+        /* Вимикач */
+        .switch {
+            width: 70px;
+            height: 100px;
+            background: linear-gradient(145deg, #3e3e40, #1e1e22);
+            border-radius: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            padding: 15px 0;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 0 #0a0a0c, 0 5px 20px rgba(0,0,0,0.8);
+            border: 1px solid #5f5f6b;
+        }
+        .switch .toggle {
+            width: 40px;
+            height: 25px;
+            background: #555;
+            border-radius: 40px;
+            transition: 0.3s;
+            box-shadow: inset 0 3px 5px #222;
+            border: 1px solid #7a7a8a;
+        }
+        .switch .toggle.on {
+            background: #ffb347;
+            box-shadow: 0 0 25px #ffb347, inset 0 2px 5px #c17f2a;
+        }
+        .switch-knob {
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle at 30% 30%, #ddd, #888);
+            border-radius: 50%;
+            box-shadow: inset -2px -2px 5px #2a2a2a, inset 2px 2px 5px #ffffff30;
+            margin-top: 5px;
+        }
+
+        /* Підказка */
+        .hint {
+            font-size: 15px;
+            color: #9aa5c9;
+            text-align: center;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+            border: 1px solid #5f6a84;
+            box-shadow: 0 4px 10px #00000055;
+        }
+
+        /* Кнопки реєстрації/входу */
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.4s;
+            pointer-events: none;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .auth-buttons.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        .auth-btn {
+            width: 130px;
+            padding: 14px 0;
+            border: none;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #7f6139, 0 10px 20px rgba(0,0,0,0.3);
+            transition: 0.1s ease;
+            border: 1px solid #ffdd99;
+            text-shadow: 0 1px 2px black;
+        }
+        .auth-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #7f6139;
+        }
+        .auth-btn.register {
+            background: linear-gradient(145deg, #ffb347, #ff9f1c);
+            color: #0b0e14;
+        }
+        .auth-btn.login {
+            background: linear-gradient(145deg, #3a6ea5, #2a4f7a);
+            color: white;
+        }
+
+        /* Контейнери форм */
+        .auth-form-container {
+            width: 100%;
+            margin-top: 20px;
+            background: #1e2434;
+            padding: 20px;
+            border-radius: 30px;
+            transition: 0.3s;
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+            box-shadow: 0 15px 25px rgba(0,0,0,0.6);
+            border: 1px solid #4f5b7a;
+        }
+        .auth-form-container.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+        }
+        .auth-form h3 {
+            color: #ffb347;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+        .auth-form input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            background: #272f41;
+            border: 1px solid #3a455b;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 15px;
+        }
+        .auth-form button[type="submit"] {
+            background: #ffb347;
+            border: none;
+            color: #0b0e14;
+            font-weight: bold;
+            padding: 14px;
+            border-radius: 40px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 17px;
+            margin-top: 5px;
+        }
+        .back-btn {
+            background: none;
+            border: 2px solid #5f6a84;
+            color: #b3c7ff;
+            padding: 8px 15px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 12px;
+            width: 100%;
+        }
+        .auth-error {
+            color: #ff6666;
+            margin-bottom: 12px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Головний додаток */
+        #main-app {
+            display: none;
+        }
+        .header {
+            background: #1e2434;
+            padding: 15px 16px 10px;
+            border-bottom: 1px solid #2c3348;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #ffffff;
+        }
+        .header h1 span {
+            color: #ffb347;
+            font-size: 13px;
+            font-weight: 400;
+            margin-left: 5px;
+        }
+        .server-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #9aa5c9;
+        }
+        /* Кнопка IP */
+        .ip-block {
+            background: #2a3347;
+            margin: 8px 16px;
+            padding: 12px 16px;
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid #ffb347;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+        .ip-block:hover {
+            background: #3f5068;
+        }
+        .copy-indicator {
+            font-size: 20px;
+        }
+        .admin-section {
+            background: #171d2b;
+            margin: 12px 16px;
+            padding: 16px;
+            border-radius: 20px;
+            border-left: 4px solid #ffb347;
+        }
+        .admin-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #ffd966;
+        }
+        .admin-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 14px;
+        }
+        .admin-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #2e3a4e;
+            padding-bottom: 4px;
+        }
+        .admin-role {
+            color: #b3c7ff;
+        }
+        .admin-count {
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .apply-button {
+            background: #ffb347;
+            border: none;
+            color: #0b0e14;
+            font-weight: bold;
+            padding: 14px 20px;
+            border-radius: 40px;
+            width: calc(100% - 32px);
+            margin: 8px 16px 16px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+        .section-title {
+            font-size: 18px;
+            color: #adc0ff;
+            margin: 16px 16px 8px;
+        }
+        .form-container {
+            background: #1e2434;
+            margin: 0 16px 20px;
+            padding: 20px;
+            border-radius: 28px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #b3c7ff;
+            margin-bottom: 4px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #272f41;
+            border: 1px solid #3a455b;
+            border-radius: 16px;
+            color: #fff;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .requirements {
+            background: #1e2a3a;
+            padding: 16px;
+            border-radius: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #ffb347;
+        }
+        .requirements h3 {
+            color: #ffd966;
+            margin-bottom: 8px;
+        }
+        .requirements ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .requirements li {
+            margin-bottom: 6px;
+            color: #b0c2e0;
+        }
+        .btn-submit {
+            background: #ffb347;
+            border: none;
+            color: #0b0e14;
+            font-weight: bold;
+            padding: 16px;
+            border-radius: 40px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .flash-message {
+            padding: 12px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .flash-success {
+            background: #1f5f3a;
+            color: #c3ffd8;
+        }
+        .flash-error {
+            background: #6b2b2b;
+            color: #ffc3c3;
+        }
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            background: #1a1f2e;
+            padding: 10px 0 16px;
+            border-top: 1px solid #2c3348;
+            flex-wrap: wrap;
+        }
+        .nav-item {
+            color: #6f7c9f;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .nav-item.active {
+            color: #ffb347;
+        }
+        .hidden {
+            display: none;
+        }
+        .admin-panel-link {
+            text-align: center;
+            margin: 8px 0;
+            font-size: 12px;
+            color: #4f5b7a;
+            cursor: pointer;
+        }
+        .admin-panel-link:hover {
+            color: #ffb347;
+        }
+        /* Адмін панель з табами */
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0 20px;
+        }
+        .admin-tab {
+            background: #2a3347;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #b3c7ff;
+            font-weight: 600;
+            transition: 0.2s;
+            border: 1px solid #4f5b7a;
+        }
+        .admin-tab.active {
+            background: #ffb347;
+            color: #0b0e14;
+            border-color: #ffb347;
+        }
+        .admin-tab:hover {
+            background: #3f5068;
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #171d2b;
+            border-radius: 20px;
+            overflow: hidden;
+            font-size: 13px;
+        }
+        .admin-table th {
+            background: #1e2434;
+            color: #ffd966;
+            padding: 8px;
+            text-align: left;
+        }
+        .admin-table td {
+            padding: 8px;
+            border-bottom: 1px solid #2c3348;
+        }
+        .status-pending { color: #ffaa66; }
+        .status-approved { color: #66ff99; }
+        .status-rejected { color: #ff6666; }
+        .btn-small {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 11px;
+            margin-right: 3px;
+        }
+        .btn-approve { background: #2e7d5e; color: white; }
+        .btn-reject { background: #b34b4b; color: white; }
+        .btn-view { background: #3a4a6b; color: white; }
+        .btn-refresh {
+            background: #4f5b7a;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-left: 10px;
+        }
+        .detail-card {
+            background: #1e2434;
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+        .detail-field {
+            margin-bottom: 12px;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #ffd966;
+        }
+        .detail-value {
+            background: #272f41;
+            padding: 8px 12px;
+            border-radius: 14px;
+            margin-top: 4px;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+        .rules-block {
+            background: #171d2b;
+            margin: 12px 16px;
+            padding: 20px;
+            border-radius: 24px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .rules-block h2 {
+            color: #ffb347;
+            margin-bottom: 16px;
+        }
+        .rules-block h3 {
+            color: #adc0ff;
+            margin: 16px 0 8px;
+        }
+        .rules-block ul {
+            padding-left: 20px;
+        }
+        .rules-block li {
+            margin-bottom: 4px;
+        }
+        .tech-info {
+            background: #1e2434;
+            margin: 20px 16px;
+            padding: 16px;
+            border-radius: 20px;
+            border-left: 4px solid #4caf50;
+        }
+        .tech-info pre {
+            background: #0b0e14;
+            padding: 10px;
+            border-radius: 12px;
+            overflow-x: auto;
+            color: #b3ffb3;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        .logout-btn {
+            background: none;
+            border: 1px solid #ffb347;
+            color: #ffb347;
+            padding: 4px 8px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+        /* Профіль */
+        .profile-info {
+            background: #171d2b;
+            margin: 16px;
+            padding: 20px;
+            border-radius: 24px;
+        }
+        .profile-field {
+            margin-bottom: 15px;
+        }
+        .profile-field label {
+            color: #ffd966;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .profile-field div {
+            background: #272f41;
+            padding: 10px 15px;
+            border-radius: 20px;
+        }
+        .change-form {
+            background: #1e2434;
+            margin: 16px;
+            padding: 20px;
+            border-radius: 24px;
+        }
+        .change-form h3 {
+            color: #ffb347;
+            margin-bottom: 15px;
+        }
+        .change-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #272f41;
+            border: 1px solid #3a455b;
+            border-radius: 30px;
+            color: #fff;
+        }
+        .change-form button {
+            background: #ffb347;
+            border: none;
+            color: #0b0e14;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 40px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .profile-message {
+            text-align: center;
+            margin: 10px 16px;
+            color: #66ff99;
+        }
+        /* Адаптація для дуже малих екранів */
+        @media (max-width: 360px) {
+            .phone {
+                border-radius: 24px;
+            }
+            .nav-item {
+                font-size: 11px;
+            }
+            .auth-btn {
+                width: 110px;
+                font-size: 14px;
+            }
+            .ip-block {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone">
+        <!-- Екран авторизації (темна кімната) -->
+        <div id="auth-screen">
+            <!-- ДУЖЕ ГАРНА ЛАМПА -->
+            <div class="lamp" id="lamp">
+                <div class="lamp-chain"></div>
+                <div class="lamp-shade">
+                    <div class="shade-pattern"></div>
+                    <div class="shade-glow"></div>
+                </div>
+                <div class="lamp-pole"></div>
+                <div class="lamp-base">
+                    <div class="base-detail"></div>
+                </div>
+                <div class="lamp-light"></div>
+                <div class="lamp-reflection"></div>
+            </div>
+
+            <!-- Вимикач -->
+            <div class="switch" id="switch">
+                <div class="toggle" id="toggle"></div>
+                <div class="switch-knob"></div>
+            </div>
+
+            <!-- Підказка -->
+            <div class="hint" id="hint">⬇️ Натисни на вимикач, щоб увімкнути світло</div>
+
+            <!-- Дві кнопки -->
+            <div class="auth-buttons" id="authButtons">
+                <button class="auth-btn register" id="showRegisterBtn">📝 Реєстрація</button>
+                <button class="auth-btn login" id="showLoginBtn">🔑 Вхід</button>
+            </div>
+
+            <!-- Форма реєстрації -->
+            <div class="auth-form-container" id="registerFormContainer">
+                <div class="auth-form">
+                    <h3>Реєстрація</h3>
+                    <div class="auth-error" id="registerError"></div>
+                    <input type="email" id="regEmail" placeholder="Email" required>
+                    <input type="password" id="regPassword" placeholder="Пароль" required>
+                    <input type="text" id="regNick" placeholder="Нік в Minecraft" required>
+                    <input type="number" id="regAge" placeholder="Ваш вік" min="12" required>
+                    <button type="submit" id="registerBtn">Зареєструватися</button>
+                    <button class="back-btn" id="backFromRegister">← Назад</button>
+                </div>
+            </div>
+
+            <!-- Форма входу -->
+            <div class="auth-form-container" id="loginFormContainer">
+                <div class="auth-form">
+                    <h3>Вхід</h3>
+                    <div class="auth-error" id="loginError"></div>
+                    <input type="text" id="loginNick" placeholder="Нік в Minecraft" required>
+                    <input type="password" id="loginPassword" placeholder="Пароль" required>
+                    <button type="submit" id="loginBtn">Увійти</button>
+                    <button class="back-btn" id="backFromLogin">← Назад</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Головний додаток (після входу) -->
+        <div id="main-app">
+            <div class="header">
+                <h1>
+                    FUNWORLD <span>2021vsds</span>
+                    <button class="logout-btn" id="logoutBtn">Вийти</button>
+                </h1>
+                <div class="server-meta">
+                    <span>⚡ Онлайн: 1 342</span>
+                    <span>📅 Весна 2026</span>
+                </div>
+            </div>
+
+            <!-- Кнопка IP -->
+            <div class="ip-block" onclick="copyIP()">
+                IP: goureeror.aternos.me <span class="copy-indicator">📋</span>
+            </div>
+
+            <!-- Блок адміністрації -->
+            <div class="admin-section">
+                <div class="admin-title">👑 Адміністрація</div>
+                <div class="admin-list" id="admin-list"></div>
+            </div>
+
+            <!-- Блок серверів -->
+            <div class="admin-section" style="border-left-color: #4caf50;">
+                <div class="admin-title" style="color: #4caf50;">🖥️ Наші сервери</div>
+                <div class="admin-list" id="servers-list">
+                    <div style="color: #6f7c9f; text-align: center; padding: 10px;">Завантаження...</div>
+                </div>
+            </div>
+
+            <!-- Кнопка переходу до анкети -->
+            <button class="apply-button" id="show-apply-form">📋 Подати заявку на адміністратора</button>
+
+            <!-- Блок анкети -->
+            <div id="apply-form-section" class="hidden">
+                <div class="section-title">🛡️ Анкета на адміністратора</div>
+                <div class="form-container">
+                    <div id="apply-flash"></div>
+                    <form id="application-form">
+                        <!-- 12 запитань -->
+                        <div class="form-group">
+                            <label>1. Ваш ник в Minecraft:</label>
+                            <input type="text" id="minecraft_nick" required>
+                        </div>
+                        <div class="form-group">
+                            <label>2. Ваше имя:</label>
+                            <input type="text" id="real_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>3. Ваш возраст:</label>
+                            <input type="number" id="age" min="12" required>
+                        </div>
+                        <div class="form-group">
+                            <label>4. Ваш Discord (ник и тег):</label>
+                            <input type="text" id="discord" placeholder="user#1234" required>
+                        </div>
+                        <div class="form-group">
+                            <label>5. Сколько времени вы играете в Minecraft:</label>
+                            <input type="text" id="minecraft_exp" required>
+                        </div>
+                        <div class="form-group">
+                            <label>6. Сколько времени вы играете на сервере FUNWORLD:</label>
+                            <input type="text" id="server_exp" required>
+                        </div>
+                        <div class="form-group">
+                            <label>7. Почему вы хотите стать администратором:</label>
+                            <textarea id="reason" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>8. Был ли у вас опыт администратора или модератора:</label>
+                            <textarea id="experience" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>9. Сколько часов в день вы можете уделять серверу:</label>
+                            <input type="text" id="hours_per_day" required>
+                        </div>
+                        <div class="form-group">
+                            <label>10. Что вы будете делать, если игрок нарушает правила:</label>
+                            <textarea id="action_on_violation" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>11. Знаете ли вы правила сервера:</label>
+                            <select id="rules_knowledge" required>
+                                <option value="">Оберіть</option>
+                                <option value="Так">Так</option>
+                                <option value="Ні">Ні</option>
+                                <option value="Частково">Частково</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>12. Готовы ли вы помогать игрокам и следить за порядком:</label>
+                            <select id="ready_to_help" required>
+                                <option value="">Оберіть</option>
+                                <option value="Так">Так</option>
+                                <option value="Ні">Ні</option>
+                            </select>
+                        </div>
+
+                        <div class="requirements">
+                            <h3>📌 Вимоги</h3>
+                            <ul>
+                                <li>✔ Вік 12+</li>
+                                <li>✔ Адекватність</li>
+                                <li>✔ Знання правил сервера</li>
+                                <li>✔ Активність</li>
+                            </ul>
+                            <p style="margin-top:12px; color:#aab7d4;">✅ Після подачі адміністрація розгляне вашу заявку.</p>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Надіслати анкету</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Новини -->
+            <div class="section-title">📰 Новини</div>
+            <div style="background:#171d2b; margin:0 16px 16px; padding:14px; border-radius:18px;">
+                <div style="background:#222b3d; padding:10px; border-radius:12px;">
+                    <strong>Оновлення сервера...</strong><br>
+                    <span style="color:#b0c2e0;">Тепер заяви на адміністратора приймаються через сайт</span>
+                </div>
+            </div>
+
+            <!-- Документи -->
+            <div class="section-title">📄 Документи</div>
+            <div style="background:#171d2b; margin:0 16px 16px; padding:14px; border-radius:18px;">
+                <span style="font-size:24px; font-weight:700; color:#ffe484;">47 док.</span>
+            </div>
+
+            <!-- Нижнє меню -->
+            <div class="bottom-nav">
+                <div class="nav-item active" data-page="main">🏠 Головна</div>
+                <div class="nav-item" data-page="shop">🛒 Магазин</div>
+                <div class="nav-item" data-page="apply">📝 Заяви</div>
+                <div class="nav-item" data-page="panel">📊 Панель</div>
+                <div class="nav-item" data-page="rules">📋 Правила</div>
+                <div class="nav-item" data-page="profile">👤 Профіль</div>
+            </div>
+
+            <!-- Посилання на адмін-панель -->
+            <div class="admin-panel-link" id="admin-link">🔐 Адмін панель</div>
+        </div>
+
+        <!-- Сторінка магазину -->
+        <div id="shop-page" class="hidden">
+            <div style="padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <button id="back-from-shop" style="background:none; border:none; color:#ffb347; cursor:pointer;">← На головну</button>
+                    <button id="shop-to-profile" style="background:#2a3347; border:none; color:#e0e4f0; padding:8px 16px; border-radius:20px; cursor:pointer; font-size:13px;">👤 Профіль</button>
+                </div>
+                <h2 style="color:#ffb347; margin-bottom:20px;">🛒 Магазин привілегій</h2>
+                
+                <!-- Баланс з кнопкою переказу -->
+                <div style="background: linear-gradient(145deg, #2a3347, #1e2434); padding:20px; border-radius:20px; margin-bottom:20px; border:1px solid #ffb347;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <span style="color:#9aa5c9;">💰 Ваш баланс:</span>
+                        <span style="color:#ffb347; font-size:24px; font-weight:bold;" id="user-balance">0.00 грн</span>
+                    </div>
+                    <button id="shop-transfer-btn" style="background: linear-gradient(145deg, #4caf50, #2e7d5e); border:none; color:white; padding:12px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%; font-size:14px;">💸 Передати гроші</button>
+                </div>
+
+                <!-- Модальне вікно переказу в магазині -->
+                <div id="shop-transfer-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+                    <div style="background:#1e2434; padding:25px; border-radius:24px; width:90%; max-width:350px; border:2px solid #ffb347;">
+                        <h3 style="color:#ffb347; margin-bottom:20px; text-align:center;">💸 Переказ коштів</h3>
+                        <div id="shop-transfer-error" style="color:#ff6b6b; font-size:13px; margin-bottom:10px;"></div>
+                        <input type="text" id="shop-transfer-nick" placeholder="Нікнейм отримувача" style="width:100%; padding:12px; margin-bottom:12px; background:#272f41; border:1px solid #3a455b; border-radius:20px; color:#fff;">
+                        <input type="number" id="shop-transfer-amount" placeholder="Сума (грн)" min="1" style="width:100%; padding:12px; margin-bottom:12px; background:#272f41; border:1px solid #3a455b; border-radius:20px; color:#fff;">
+                        <input type="password" id="shop-transfer-password" placeholder="Ваш пароль" style="width:100%; padding:12px; margin-bottom:20px; background:#272f41; border:1px solid #3a455b; border-radius:20px; color:#fff;">
+                        <div style="display:flex; gap:10px;">
+                            <button id="shop-transfer-cancel" style="flex:1; background:#3a455b; border:none; color:#e0e4f0; padding:12px; border-radius:30px; cursor:pointer; font-weight:bold;">Скасувати</button>
+                            <button id="shop-transfer-confirm" style="flex:1; background:#4caf50; border:none; color:white; padding:12px; border-radius:30px; cursor:pointer; font-weight:bold;">📤 Переказати</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Категорії -->
+                <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+                    <button class="shop-tab active" data-category="all" style="background:#ffb347; border:none; padding:10px 20px; border-radius:30px; color:#0b0e14; font-weight:bold; cursor:pointer;">Все</button>
+                    <button class="shop-tab" data-category="ranks" style="background:#2a3347; border:none; padding:10px 20px; border-radius:30px; color:#e0e4f0; cursor:pointer;">Привілеї</button>
+                    <button class="shop-tab" data-category="chests" style="background:#2a3347; border:none; padding:10px 20px; border-radius:30px; color:#e0e4f0; cursor:pointer;">Сундуки</button>
+                    <button class="shop-tab" data-category="services" style="background:#2a3347; border:none; padding:10px 20px; border-radius:30px; color:#e0e4f0; cursor:pointer;">Послуги</button>
+                </div>
+
+                <!-- Товари -->
+                <div id="shop-items" style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                    <!-- === ПРИВІЛЕГІЇ (РАНГИ) === -->
+                    <!-- HERO -->
+                    <div class="shop-item" data-category="ranks" style="background: linear-gradient(145deg, #1a3a1a, #0d1f0d); border-radius:16px; padding:15px; text-align:center; border:2px solid #4caf50; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#ff4444; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">-50%</div>
+                        <div style="font-size:50px; margin:10px 0;">🦸</div>
+                        <h3 style="color:#4caf50; font-size:16px; margin-bottom:8px; font-weight:bold;">HERO</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Базовий набір привілеїв для початківців</p>
+                        <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">1000 грн</div>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">500 грн</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- TITAN -->
+                    <div class="shop-item" data-category="ranks" style="background: linear-gradient(145deg, #2d4a2d, #1a2f1a); border-radius:16px; padding:15px; text-align:center; border:2px solid #66bb6a; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#ff4444; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">-40%</div>
+                        <div style="font-size:50px; margin:10px 0;">🧌</div>
+                        <h3 style="color:#66bb6a; font-size:16px; margin-bottom:8px; font-weight:bold;">TITAN</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Посилені можливості для гравців</p>
+                        <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">1000 грн</div>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">600 грн</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- AVENGER -->
+                    <div class="shop-item" data-category="ranks" style="background: linear-gradient(145deg, #3d5c3d, #264026); border-radius:16px; padding:15px; text-align:center; border:2px solid #81c784; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#ff4444; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">-35%</div>
+                        <div style="font-size:50px; margin:10px 0;">⚔️</div>
+                        <h3 style="color:#81c784; font-size:16px; margin-bottom:8px; font-weight:bold;">AVENGER</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Справжній месник сервера</p>
+                        <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">1100 грн</div>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">700 грн</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- OVERLORD -->
+                    <div class="shop-item" data-category="ranks" style="background: linear-gradient(145deg, #4a4d2d, #2f321a); border-radius:16px; padding:15px; text-align:center; border:2px solid #aed581; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#ff4444; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">-30%</div>
+                        <div style="font-size:50px; margin:10px 0;">💀</div>
+                        <h3 style="color:#aed581; font-size:16px; margin-bottom:8px; font-weight:bold;">OVERLORD</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Владар темних сил сервера</p>
+                        <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">1200 грн</div>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">900 грн</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- IMPERATOR -->
+                    <div class="shop-item" data-category="ranks" style="background: linear-gradient(145deg, #4a3d2d, #2f261a); border-radius:16px; padding:15px; text-align:center; border:2px solid #ffb74d; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#ff4444; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">-25%</div>
+                        <div style="font-size:50px; margin:10px 0;">👑</div>
+                        <h3 style="color:#ffb74d; font-size:16px; margin-bottom:8px; font-weight:bold;">IMPERATOR</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Імператор з особливими правами</p>
+                        <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">1500 грн</div>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">1100 грн</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- MAGISTER -->
+                    <div class="shop-item" data-category="ranks" style="background: linear-gradient(145deg, #2d3a4a, #1a222f); border-radius:16px; padding:15px; text-align:center; border:2px solid #64b5f6; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#ff4444; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">-20%</div>
+                        <div style="font-size:50px; margin:10px 0;">🧙</div>
+                        <h3 style="color:#64b5f6; font-size:16px; margin-bottom:8px; font-weight:bold;">MAGISTER</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Магістр магії та чарів</p>
+                        <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">1700 грн</div>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">1300 грн</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- DRAGON -->
+                    <div class="shop-item" data-category="ranks" style="background: linear-gradient(145deg, #4a2d3a, #2f1a22); border-radius:16px; padding:15px; text-align:center; border:2px solid #e57373; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#ff4444; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">-15%</div>
+                        <div style="font-size:50px; margin:10px 0;">🐉</div>
+                        <h3 style="color:#e57373; font-size:16px; margin-bottom:8px; font-weight:bold;">DRAGON</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Сила легендарного дракона</p>
+                        <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">1200 грн</div>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">800 грн</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- PEGAS -->
+                    <div class="shop-item" data-category="ranks" style="background: linear-gradient(145deg, #4a3d2d, #2f261a); border-radius:16px; padding:15px; text-align:center; border:2px solid #ff8a65; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#ff4444; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">-10%</div>
+                        <div style="font-size:50px; margin:10px 0;">🦄</div>
+                        <h3 style="color:#ff8a65; font-size:16px; margin-bottom:8px; font-weight:bold;">PEGAS</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Крилатий ранг для обраних</p>
+                        <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">2500 грн</div>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">1700 грн</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- GOD -->
+                    <div class="shop-item" data-category="ranks" style="background: linear-gradient(145deg, #4a4a2d, #2f2f1a); border-radius:16px; padding:15px; text-align:center; border:2px solid #ffd54f; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#ff4444; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">-5%</div>
+                        <div style="font-size:50px; margin:10px 0;">😇</div>
+                        <h3 style="color:#ffd54f; font-size:16px; margin-bottom:8px; font-weight:bold;">GOD</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Божественний ранг з усіма правами</p>
+                        <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">2000 грн</div>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">1500 грн</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- HELPER -->
+                    <div class="shop-item" data-category="ranks" style="background: linear-gradient(145deg, #3d4a5c, #222f3d); border-radius:16px; padding:15px; text-align:center; border:2px solid #90caf9; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#4caf50; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">NEW</div>
+                        <div style="font-size:50px; margin:10px 0;">🎓</div>
+                        <h3 style="color:#90caf9; font-size:16px; margin-bottom:8px; font-weight:bold;">HELPER</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Помічник адміністрації сервера</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">1700 грн</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- === СУНДУКИ (CHESTS) === -->
+                    <!-- Донат речі 3 шт -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #3d5c3d, #264026); border-radius:16px; padding:15px; text-align:center; border:2px solid #4caf50; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#4caf50; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">ВИГІДНО</div>
+                        <div style="font-size:45px; margin:10px 0;">📦</div>
+                        <h3 style="color:#4caf50; font-size:14px; margin-bottom:8px; font-weight:bold;">3 сундука з донат речами</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Випадкові донат предмети</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€3.99</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Донат речі 5 шт -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #5c3d3d, #402626); border-radius:16px; padding:15px; text-align:center; border:2px solid #ff7043; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#ff7043; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">ХІТ</div>
+                        <div style="font-size:45px; margin:10px 0;">📦📦</div>
+                        <h3 style="color:#ff7043; font-size:14px; margin-bottom:8px; font-weight:bold;">5 сундуків з донат речами</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Більше шансів на круті речі!</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€6.49</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Донат речі 10 шт -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #3d3d5c, #262640); border-radius:16px; padding:15px; text-align:center; border:2px solid #7c4dff; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; left:10px; background:#7c4dff; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">MEGA</div>
+                        <div style="font-size:45px; margin:10px 0;">📦📦📦</div>
+                        <h3 style="color:#7c4dff; font-size:14px; margin-bottom:8px; font-weight:bold;">10 сундуків з донат речами</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Максимальний шанс на легендарки</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€12.99</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Валюта 3 сундуки -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #5c5c3d, #404026); border-radius:16px; padding:15px; text-align:center; border:2px solid #ffca28; position:relative; overflow:hidden;">
+                        <div style="font-size:45px; margin:10px 0;">💰</div>
+                        <h3 style="color:#ffca28; font-size:14px; margin-bottom:8px; font-weight:bold;">3 сундука з Валютою</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Від 1000 до 50000 ігрової валюти</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€2.49</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Валюта 10 сундуків -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #5c4a3d, #403026); border-radius:16px; padding:15px; text-align:center; border:2px solid #ffa726; position:relative; overflow:hidden;">
+                        <div style="font-size:45px; margin:10px 0;">💰💰</div>
+                        <h3 style="color:#ffa726; font-size:14px; margin-bottom:8px; font-weight:bold;">10 сундуків з Валютою</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Більше сундуків = більше грошей!</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€7.49</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Валюта 25 сундуків -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #3d4a5c, #222f3d); border-radius:16px; padding:15px; text-align:center; border:2px solid #42a5f5; position:relative; overflow:hidden;">
+                        <div style="font-size:45px; margin:10px 0;">💰💰💰</div>
+                        <h3 style="color:#42a5f5; font-size:14px; margin-bottom:8px; font-weight:bold;">25 сундуків з Валютою</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Супер вигідна пропозиція!</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€16.99</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Префікси x3 -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #4a3d5c, #2f223d); border-radius:16px; padding:15px; text-align:center; border:2px solid #ab47bc; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; right:10px; background:#ab47bc; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">x3</div>
+                        <div style="font-size:45px; margin:10px 0;">🏷️</div>
+                        <h3 style="color:#ab47bc; font-size:14px; margin-bottom:8px; font-weight:bold;">3 сундука з Префіксами</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Кольорові префікси для чату</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€0.99</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Префікси x10 -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #5c3d4a, #3d2226); border-radius:16px; padding:15px; text-align:center; border:2px solid #ec407a; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; right:10px; background:#ec407a; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">x10</div>
+                        <div style="font-size:45px; margin:10px 0;">🏷️🏷️</div>
+                        <h3 style="color:#ec407a; font-size:14px; margin-bottom:8px; font-weight:bold;">10 сундуків з Префіксами</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Більше префіксів на вибір</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€2.89</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Префікси x25 -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #3d5c5c, #223d3d); border-radius:16px; padding:15px; text-align:center; border:2px solid #26a69a; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; right:10px; background:#26a69a; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">x25</div>
+                        <div style="font-size:45px; margin:10px 0;">🏷️🏷️🏷️</div>
+                        <h3 style="color:#26a69a; font-size:14px; margin-bottom:8px; font-weight:bold;">25 сундуків з Префіксами</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Всі префікси сервера!</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€5.89</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Кіти x3 -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #4a4a5c, #26263d); border-radius:16px; padding:15px; text-align:center; border:2px solid #7986cb; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; right:10px; background:#7986cb; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">x3</div>
+                        <div style="font-size:45px; margin:10px 0;">🎁</div>
+                        <h3 style="color:#7986cb; font-size:14px; margin-bottom:8px; font-weight:bold;">3 сундука з Кітами</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Набори предметів для старту</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€2.99</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Кіти x5 -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #5c4a5c, #3d263d); border-radius:16px; padding:15px; text-align:center; border:2px solid #ba68c8; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; right:10px; background:#ba68c8; color:white; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">x5</div>
+                        <div style="font-size:45px; margin:10px 0;">🎁🎁</div>
+                        <h3 style="color:#ba68c8; font-size:14px; margin-bottom:8px; font-weight:bold;">5 сундуків з Кітами</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Вигідний набір кітів</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€4.89</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Кіти x10 -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #4a5c4a, #263d26); border-radius:16px; padding:15px; text-align:center; border:2px solid #69f0ae; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:10px; right:10px; background:#69f0ae; color:#0b0e14; padding:4px 8px; border-radius:8px; font-size:11px; font-weight:bold;">x10</div>
+                        <div style="font-size:45px; margin:10px 0;">🎁🎁🎁</div>
+                        <h3 style="color:#69f0ae; font-size:14px; margin-bottom:8px; font-weight:bold;">10 сундуків з Кітами</h3>
+                        <p style="color:#9aa5c9; font-size:10px; margin-bottom:12px; line-height:1.3;">Максимальна кількість кітів</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:16px;">€8.99</div>
+                        <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🛒 Купити</button>
+                    </div>
+
+                    <!-- Ридліки -->
+                    <div class="shop-item" data-category="chests" style="background: linear-gradient(145deg, #3d3d3d, #1f1f1f); border-radius:16px; padding:15px; text-align:center; border:2px solid #ff5252; position:relative; overflow:hidden; grid-column:1 / -1;">
+                        <div style="font-size:45px; margin:10px 0;">🎲</div>
+                        <h3 style="color:#ff5252; font-size:16px; margin-bottom:8px; font-weight:bold;">Сундуки з Рилліками</h3>
+                        <p style="color:#9aa5c9; font-size:12px; margin-bottom:12px; line-height:1.3;">Особливі сундуки з ридликами для унікальних можливостей</p>
+                        <div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
+                            <div style="text-align:center;">
+                                <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">€1.98</div>
+                                <div style="color:#ffb347; font-weight:bold; font-size:14px;">€0.99</div>
+                                <div style="font-size:12px; color:#9aa5c9;">1 сундук</div>
+                                <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:6px 12px; border-radius:20px; cursor:pointer; font-weight:bold; margin-top:5px; font-size:12px;">🛒</button>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">€5.67</div>
+                                <div style="color:#ffb347; font-weight:bold; font-size:14px;">€2.89</div>
+                                <div style="font-size:12px; color:#9aa5c9;">3 сундуки</div>
+                                <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:6px 12px; border-radius:20px; cursor:pointer; font-weight:bold; margin-top:5px; font-size:12px;">🛒</button>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="color:#ff6b6b; text-decoration:line-through; font-size:12px;">€8.18</div>
+                                <div style="color:#ffb347; font-weight:bold; font-size:14px;">€4.19</div>
+                                <div style="font-size:12px; color:#9aa5c9;">5 сундуків</div>
+                                <button class="buy-btn" style="background:#2e7d5e; border:none; color:white; padding:6px 12px; border-radius:20px; cursor:pointer; font-weight:bold; margin-top:5px; font-size:12px;">🛒</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- === ПОСЛУГИ (SERVICES) === -->
+                    <!-- Розбан -->
+                    <div class="shop-item" data-category="services" style="background: linear-gradient(145deg, #5c3d3d, #402626); border-radius:16px; padding:15px; text-align:center; border:2px solid #ff1744; position:relative; overflow:hidden;">
+                        <div style="font-size:50px; margin:10px 0;">🔓</div>
+                        <h3 style="color:#ff1744; font-size:18px; margin-bottom:8px; font-weight:bold;">РАЗБАН</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Зняття блокування акаунта</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">800 грн</div>
+                        <button class="buy-btn" style="background:#ff1744; border:none; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🔓 Розблокувати</button>
+                    </div>
+
+                    <!-- Розмут -->
+                    <div class="shop-item" data-category="services" style="background: linear-gradient(145deg, #4a4a3d, #2f2f26); border-radius:16px; padding:15px; text-align:center; border:2px solid #ffc400; position:relative; overflow:hidden;">
+                        <div style="font-size:50px; margin:10px 0;">🔊</div>
+                        <h3 style="color:#ffc400; font-size:18px; margin-bottom:8px; font-weight:bold;">РАЗМУТ</h3>
+                        <p style="color:#9aa5c9; font-size:11px; margin-bottom:12px; line-height:1.3;">Зняття муту в чаті</p>
+                        <div style="color:#ffb347; font-weight:bold; margin-bottom:12px; font-size:18px;">400 грн</div>
+                        <button class="buy-btn" style="background:#ffc400; border:none; color:#0b0e14; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold; width:100%;">🔊 Розмутити</button>
+                    </div>
+                </div>
+
+                <!-- Соціальні посилання -->
+                <div style="margin-top:30px; background:#171d2b; padding:20px; border-radius:20px;">
+                    <h3 style="color:#ffd966; margin-bottom:15px; text-align:center;">🌐 Ми в соцмережах</h3>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                        <a href="https://vk.com" target="_blank" style="background: linear-gradient(145deg, #4a76a8, #3d5c7a); padding:15px; border-radius:16px; text-decoration:none; color:white; text-align:center; display:flex; flex-direction:column; align-items:center; transition:0.3s;">
+                            <span style="font-size:30px; margin-bottom:5px;">📱</span>
+                            <span style="font-weight:bold; font-size:14px;">Ми ВКонтакті</span>
+                        </a>
+                        <a href="#" target="_blank" style="background: linear-gradient(145deg, #6b4c9a, #4a3570); padding:15px; border-radius:16px; text-decoration:none; color:white; text-align:center; display:flex; flex-direction:column; align-items:center; transition:0.3s;">
+                            <span style="font-size:30px; margin-bottom:5px;">💬</span>
+                            <span style="font-weight:bold; font-size:14px;">Форум</span>
+                        </a>
+                        <a href="https://youtube.com" target="_blank" style="background: linear-gradient(145deg, #ff0000, #cc0000); padding:15px; border-radius:16px; text-decoration:none; color:white; text-align:center; display:flex; flex-direction:column; align-items:center; transition:0.3s;">
+                            <span style="font-size:30px; margin-bottom:5px;">📺</span>
+                            <span style="font-weight:bold; font-size:14px;">Наш YouTube</span>
+                        </a>
+                        <a href="https://discord.com" target="_blank" style="background: linear-gradient(145deg, #7289da, #5865f2); padding:15px; border-radius:16px; text-decoration:none; color:white; text-align:center; display:flex; flex-direction:column; align-items:center; transition:0.3s;">
+                            <span style="font-size:30px; margin-bottom:5px;">🎮</span>
+                            <span style="font-weight:bold; font-size:14px;">Discord Сервер</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Футер магазину -->
+                <div style="margin-top:30px; padding:20px; text-align:center; border-top:1px solid #2c3348;">
+                    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px;">
+                        <span style="font-size:24px;">🎮</span>
+                        <span style="color:#ffb347; font-weight:bold; font-size:18px;">FUNWORLD</span>
+                    </div>
+                    <p style="color:#6f7c9f; font-size:12px; margin:0;">© 2026 FunWorld. Всі права захищені.</p>
+                    <p style="color:#6f7c9f; font-size:11px; margin-top:8px;">FunWorld не пов'язаний з MojangAB. Всі кошти йдуть на розвиток проєкту.</p>
+                    <div style="display:flex; justify-content:center; gap:20px; margin-top:15px; flex-wrap:wrap;">
+                        <a href="#" style="color:#9aa5c9; text-decoration:none; font-size:12px;">Головна</a>
+                        <a href="#" style="color:#9aa5c9; text-decoration:none; font-size:12px;">Форум</a>
+                        <a href="#" style="color:#9aa5c9; text-decoration:none; font-size:12px;">Правила</a>
+                        <a href="#" style="color:#9aa5c9; text-decoration:none; font-size:12px;">Опис привілегій</a>
+                    </div>
+                </div>
+
+                <!-- Історія покупок -->
+                <div style="margin-top:30px; background:#171d2b; padding:20px; border-radius:20px;">
+                    <h3 style="color:#ffd966; margin-bottom:15px;">📜 Історія покупок</h3>
+                    <div id="purchase-history" style="font-size:13px; color:#9aa5c9;">
+                        <div style="padding:10px 0; border-bottom:1px solid #2c3348;">Поки що немає покупок</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Сторінка правил -->
+        <div id="rules-page" class="hidden">
+            <div style="padding:20px;">
+                <button id="back-from-rules" style="background:none; border:none; color:#ffb347; margin-bottom:16px; cursor:pointer;">← На головну</button>
+                <div class="rules-block">
+                    <h2>📜 Правила сервера FUNWORLD</h2>
+                    <h3>1. Основные правила</h3>
+                    <ul>
+                        <li>1.1 Уважайте всех игроков сервера.</li>
+                        <li>1.2 Запрещены оскорбления, унижения и токсичное поведение.</li>
+                        <li>1.3 Запрещён спам и флуд в чате.</li>
+                        <li>1.4 Запрещена реклама других серверов без разрешения администрации.</li>
+                        <li>1.5 Нельзя выдавать себя за администрацию.</li>
+                    </ul>
+                    <h3>2. Игровые правила</h3>
+                    <ul>
+                        <li>2.1 Запрещено использовать читы, моды дающие преимущество (X-Ray, KillAura и т.д.).</li>
+                        <li>2.2 Запрещено использовать баги и дюпы сервера.</li>
+                        <li>2.3 Гриферство запрещено (разрушение чужих построек).</li>
+                        <li>2.4 Нельзя воровать вещи у игроков без разрешения.</li>
+                        <li>2.5 Запрещено мешать игре другим игрокам.</li>
+                    </ul>
+                    <h3>3. Правила чата</h3>
+                    <ul>
+                        <li>3.1 Не использовать капс (ПИСАТЬ ВОТ ТАК).</li>
+                        <li>3.2 Запрещён мат и оскорбления.</li>
+                        <li>3.3 Не флудить одинаковыми сообщениями.</li>
+                        <li>3.4 Запрещено обсуждение политики и конфликтов.</li>
+                    </ul>
+                    <h3>4. Правила для администрации</h3>
+                    <ul>
+                        <li>4.1 Администратор обязан помогать игрокам.</li>
+                        <li>4.2 Запрещено использовать админку в личных целях.</li>
+                        <li>4.3 Администратор должен соблюдать правила сервера.</li>
+                        <li>4.4 Запрещено выдавать наказания без причины.</li>
+                    </ul>
+                    <h3>5. Наказания</h3>
+                    <ul>
+                        <li>5.1 Предупреждение.</li>
+                        <li>5.2 Мут (запрет писать в чат).</li>
+                        <li>5.3 Кик (выгнать с сервера).</li>
+                        <li>5.4 Бан (временный или навсегда).</li>
+                    </ul>
+                    <p style="margin-top:16px;">✅ Играя на сервере FUNWORLD, вы автоматически соглашаетесь с правилами.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Адмін-панель (оновлена) -->
+        <div id="admin-panel" class="hidden">
+            <div style="padding:20px;">
+                <button id="back-to-main" style="background:none; border:none; color:#ffb347; margin-bottom:16px; cursor:pointer;">← На головну</button>
+                <h2 style="color:#ffb347;">Адмін-панель</h2>
+                <div class="admin-tabs">
+                    <div class="admin-tab active" id="tab-applications">📋 Заяви</div>
+                    <div class="admin-tab" id="tab-users">👥 Користувачі</div>
+                </div>
+                <div id="admin-applications-list"></div>
+                <div id="admin-users-list" class="hidden"></div>
+                <div style="margin-top:15px; text-align:right;">
+                    <button class="btn-refresh" id="refresh-admin">🔄 Оновити</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Детальний перегляд заяви -->
+        <div id="application-detail" class="hidden">
+            <div style="padding:20px;">
+                <button id="back-to-admin" style="background:none; border:none; color:#ffb347; margin-bottom:16px; cursor:pointer;">← До списку заяв</button>
+                <div id="detail-content"></div>
+            </div>
+        </div>
+
+        <!-- Сторінка профілю -->
+        <div id="profile-page" class="hidden">
+            <div style="padding:20px;">
+                <button id="back-from-profile" style="background:none; border:none; color:#ffb347; margin-bottom:16px; cursor:pointer;">← На головну</button>
+                <h2 style="color:#ffb347;">Мій профіль</h2>
+                <div class="profile-info" id="profile-info"></div>
+                <div class="change-form">
+                    <h3>Зміна пароля</h3>
+                    <div id="password-error" class="auth-error"></div>
+                    <input type="password" id="old-password" placeholder="Старий пароль">
+                    <input type="password" id="new-password" placeholder="Новий пароль">
+                    <input type="password" id="confirm-password" placeholder="Підтвердьте новий пароль">
+                    <button id="change-password-btn">Змінити пароль</button>
+                </div>
+                <div class="change-form">
+                    <h3>Зміна нікнейма</h3>
+                    <div id="nick-error" class="auth-error"></div>
+                    <input type="text" id="new-nick" placeholder="Новий нікнейм">
+                    <input type="password" id="nick-password" placeholder="Підтвердьте пароль">
+                    <button id="change-nick-btn">Змінити нікнейм</button>
+                </div>
+                <div class="change-form">
+                    <h3>💸 Переказ коштів</h3>
+                    <div id="transfer-error" class="auth-error"></div>
+                    <input type="text" id="transfer-nick" placeholder="Нікнейм отримувача">
+                    <input type="number" id="transfer-amount" placeholder="Сума (грн)" min="1">
+                    <input type="password" id="transfer-password" placeholder="Ваш пароль для підтвердження">
+                    <button id="transfer-btn">📤 Переказати</button>
+                </div>
+                <div class="change-form">
+                    <h3>💰 Поповнення балансу (Донат)</h3>
+                    <div id="donate-error" class="auth-error"></div>
+                    <p style="color:#9aa5c9; font-size:12px; margin-bottom:10px;">Введіть суму для поповнення (тестовий режим)</p>
+                    <input type="number" id="donate-amount" placeholder="Сума (грн)" min="1">
+                    <input type="password" id="donate-password" placeholder="Ваш пароль для підтвердження">
+                    <button id="donate-btn" style="background: linear-gradient(145deg, #4caf50, #2e7d5e);">💳 Поповнити баланс</button>
+                </div>
+                <div id="profile-message" class="profile-message"></div>
+            </div>
+        </div>
+
+        <!-- Сторінка панелі (онлайн статистика) -->
+        <div id="panel-page" class="hidden">
+            <div style="padding:20px;">
+                <button id="back-from-panel" style="background:none; border:none; color:#ffb347; margin-bottom:16px; cursor:pointer;">← На головну</button>
+                <h2 style="color:#ffb347; margin-bottom:20px;">📊 Панель онлайну</h2>
+                
+                <!-- Статистика онлайну -->
+                <div style="background: linear-gradient(145deg, #2a3347, #1e2434); padding:20px; border-radius:20px; margin-bottom:20px; border:1px solid #ffb347;">
+                    <h3 style="color:#ffd966; margin-bottom:15px; text-align:center;">👥 Користувачі онлайн</h3>
+                    <div style="display:flex; justify-content:space-around; margin-bottom:20px;">
+                        <div style="text-align:center;">
+                            <div style="font-size:36px; color:#66ff99; font-weight:bold;" id="online-admins">0</div>
+                            <div style="color:#9aa5c9; font-size:12px;">Адміністраторів</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:36px; color:#66b3ff; font-weight:bold;" id="online-users">0</div>
+                            <div style="color:#9aa5c9; font-size:12px;">Гравців</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:36px; color:#ffb347; font-weight:bold;" id="total-online">0</div>
+                            <div style="color:#9aa5c9; font-size:12px;">Всього</div>
+                        </div>
+                    </div>
+                    <div style="background:#171d2b; padding:15px; border-radius:16px; text-align:center;">
+                        <span style="color:#9aa5c9;">🟢 Сервер онлайн</span>
+                        <span style="color:#66ff99; margin-left:10px; font-weight:bold;">goureeror.aternos.me</span>
+                    </div>
+                </div>
+
+                <!-- Список адмінів онлайн -->
+                <div style="background:#171d2b; padding:20px; border-radius:20px; margin-bottom:15px;">
+                    <h3 style="color:#66ff99; margin-bottom:15px;">🔰 Адміністратори онлайн</h3>
+                    <div id="online-admins-list" style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="color:#6f7c9f; text-align:center; padding:10px;">Немає адміністраторів онлайн</div>
+                    </div>
+                </div>
+
+                <!-- Список гравців онлайн -->
+                <div style="background:#171d2b; padding:20px; border-radius:20px;">
+                    <h3 style="color:#66b3ff; margin-bottom:15px;">🎮 Гравці онлайн</h3>
+                    <div id="online-users-list" style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="color:#6f7c9f; text-align:center; padding:10px;">Немає гравців онлайн</div>
+                    </div>
+                </div>
+
+                <!-- Оновлення -->
+                <div style="margin-top:20px; text-align:center;">
+                    <button id="refresh-panel" style="background:#3a455b; border:none; color:#e0e4f0; padding:10px 20px; border-radius:20px; cursor:pointer;">🔄 Оновити</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
